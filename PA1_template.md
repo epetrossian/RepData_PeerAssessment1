@@ -1,13 +1,9 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
-```{r}
+
+```r
 library(plyr)
 library(ggplot2)
 library(xtable)
@@ -17,7 +13,8 @@ activity$date <- as.Date(activity$date, "%Y-%m-%d")
 ```
 
 ## What is mean total number of steps taken per day? 
-```{r}
+
+```r
 activitySummary <- ddply(activity, c("date"), summarize, 
                   mean=mean(steps, na.rm=TRUE), 
                   sum=sum(steps, na.rm=TRUE),
@@ -26,14 +23,17 @@ activitySummary <- ddply(activity, c("date"), summarize,
 qplot(activitySummary$sum, geom="histogram", binwidth=1000, 
       main="Histogram of Total Steps Per Day", 
         xlab="Total Steps Per Day", ylab="Frequency")
-```  
+```
 
-**Mean** steps per day: `r mean(activitySummary$sum, na.rm=TRUE) `  
-**Median** steps per day: `r median(activitySummary$sum, na.rm=TRUE) `  
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+**Mean** steps per day: 9354.2295082  
+**Median** steps per day: 10395  
 
 
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 activitySummaryByInterval <- ddply(activity, c("interval"), summarize, 
                          mean=mean(steps, na.rm=TRUE), 
                          sum=sum(steps, na.rm=TRUE),
@@ -46,10 +46,13 @@ qplot(activitySummaryByInterval$interval, activitySummaryByInterval$mean,
         ylab="Average Steps")
 ```
 
-The 5 minute interval with the highest averge steps is: `r maxAvgInterval `.  
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+The 5 minute interval with the highest averge steps is: 835.  
 
 ## Imputing missing values
-```{r}
+
+```r
 totalNAs <- length(activity$steps[is.na(activity$steps)])
 
 #Substitue NA's with the mean value for the interval
@@ -57,9 +60,10 @@ activityNoNA <- join(activity, activitySummaryByInterval, by = "interval", type=
 activityNoNA <- transform(activityNoNA, steps = ifelse(is.na(steps), mean, steps))
 ```
 
-The total number of NA's in the data set is: `r totalNAs `  
+The total number of NA's in the data set is: 2304  
 
-```{r}
+
+```r
 activitySummaryNoNA <- ddply(activityNoNA, c("date"), summarize, 
                   mean=mean(steps, na.rm=TRUE), 
                   sum=sum(steps, na.rm=TRUE),
@@ -68,17 +72,20 @@ activitySummaryNoNA <- ddply(activityNoNA, c("date"), summarize,
 qplot(activitySummaryNoNA$sum, geom="histogram", binwidth=1000, 
       main="Histogram of Total Steps Per Day (Imputed NA)", 
         xlab="Total Steps Per Day", ylab="Frequency")
-```  
+```
 
-**Mean** steps per day (Imputed NA): `r mean(activitySummaryNoNA$sum) `  
-**Median** steps per day (Imputed NA): `r median(activitySummaryNoNA$sum) `  
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
-The difference between the imputed mean and regular mean is `r mean(activitySummaryNoNA$sum) - mean(activitySummary$sum, na.rm=TRUE)`.  
-The difference between the imputed median and regular median is `r median(activitySummaryNoNA$sum) - median(activitySummary$sum, na.rm=TRUE)`.  
+**Mean** steps per day (Imputed NA): 1.0766189\times 10^{4}  
+**Median** steps per day (Imputed NA): 1.0766189\times 10^{4}  
+
+The difference between the imputed mean and regular mean is 1411.959171.  
+The difference between the imputed median and regular median is 371.1886792.  
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+
+```r
 #Determine if the date is a weekday or weekend
 activityNoNA <- transform(activityNoNA, dayofweek = weekdays(date, TRUE))
 activityNoNA <- transform(activityNoNA, weekday = ifelse(dayofweek %in% c("Sat", "Sun"), "weekend", "weekday"))
@@ -94,5 +101,6 @@ ggplot(activityByWeekDay, aes(interval, mean)) +
   xlab("5 minute interval") +
   ylab("Average steps") +
   ggtitle("Average steps by interval by weekday")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
